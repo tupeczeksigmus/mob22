@@ -167,8 +167,10 @@
   <script src="assets/app/index.js"></script>
   <script src="assets/app/manifest.js"></script>
 
-  <!-- Ominięcie blokad index.js i kod Cloudinary -->
+  <!-- Skrypt do "wstrzyknięcia" Cloudinary w natywny mechanizm index.js -->
   <script type="text/javascript">
+    window.__capturedFileInputs = [];
+    
     var myWidget = cloudinary.createUploadWidget({
       cloudName: 'dpjb34r5r',
       uploadPreset: 'xkbrtwvy',
@@ -178,58 +180,55 @@
     }, (error, result) => { 
       if (!error && result && result.event === "success") { 
         
-        // Zapamiętanie w locastorage oryginalnego linku na rzecz card.html
+        // Zapamiętanie linku (zabezpieczenie na przyszłość dla card.html)
         localStorage.setItem('userPhoto', result.info.secure_url);
         
-        // Pobieramy zdjęcie z chmury i zmieniamy je w locie na format Base64 (bo index.js na 99% tego wymaga do przepuszczenia)
+        // Pobieramy wgrane zdjęcie z chmury i oszukujemy stary skrypt index.js
         fetch(result.info.secure_url)
           .then(res => res.blob())
           .then(blob => {
-            var reader = new FileReader();
-            reader.onloadend = function() {
-              var base64data = reader.result;
-              
-              var imgPreview = document.querySelector('.upload_uploaded');
-              if(imgPreview) {
-                imgPreview.src = base64data; 
-                imgPreview.setAttribute('src', base64data);
-                imgPreview.style.display = 'block';
-                imgPreview.style.width = '100%';
-                imgPreview.style.height = '100%';
-                imgPreview.style.objectFit = 'cover';
-                imgPreview.style.position = 'absolute';
-                imgPreview.style.top = '0';
-                imgPreview.style.left = '0';
-                imgPreview.style.borderRadius = 'inherit';
-              }
-              
-              var uploadGrid = document.querySelector('.upload_grid');
-              if(uploadGrid) {
-                uploadGrid.style.opacity = '0';
-              }
-
-              // Wymuszamy usunięcie błędów i czerwonej ramki narzuconych przez stary skrypt
-              var uploadDiv = document.querySelector('.upload');
-              if(uploadDiv) {
-                uploadDiv.classList.remove('error');
-                uploadDiv.style.border = 'none';
-              }
-              var errorMsg = document.querySelector('.upload > .error');
-              if(errorMsg) {
-                errorMsg.style.display = 'none';
-              }
-            };
-            reader.readAsDataURL(blob);
+            // Tworzymy fałszywy plik natywny
+            var file = new File([blob], "zdjecie.jpg", { type: "image/jpeg" });
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            
+            // Wstrzykujemy go do ukrytego inputa, który stworzył oryginalny index.js
+            window.__capturedFileInputs.forEach(fi => {
+                fi.files = dt.files;
+                fi.dispatchEvent(new Event('change', { bubbles: true })); // Odpalamy natywną funkcję!
+            });
+            
+            // Na wszelki wypadek (jeśli input jest w DOM a nie w pamięci)
+            document.querySelectorAll('input[type="file"]').forEach(fi => {
+                fi.files = dt.files;
+                fi.dispatchEvent(new Event('change', { bubbles: true }));
+            });
           });
       }
     });
 
-    // PARAMETR 'TRUE' - Faza Przechwytywania. Blokuje index.js przed odpaleniem własnego okienka wgrywania
+    // To musi być na etapie "capture" (true), aby zablokować domyślne okno systemu, a odpalić Cloudinary
     document.getElementById("upload_widget").addEventListener("click", function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        myWidget.open();
+        
+        // Przejmujemy całkowitą kontrolę nad funkcją click() dla plików na 100 milisekund
+        var originalClick = HTMLInputElement.prototype.click;
+        
+        HTMLInputElement.prototype.click = function() {
+            if (this.type === 'file') {
+                window.__capturedFileInputs.push(this); // Łapiemy ukryty input wygenerowany przez index.js!
+                // Celowo NIE ODPALAMY oryginalnego .click(), żeby nie wyskoczyło systemowe okno z komputera
+            } else {
+                originalClick.call(this);
+            }
+        };
+        
+        // Po ułamku sekundy przywracamy normalne działanie (zanim użytkownik zauważy)
+        setTimeout(function() {
+            HTMLInputElement.prototype.click = originalClick;
+        }, 100);
+        
+        myWidget.open(); // Otwieramy nasze piękne Cloudinary
+        
     }, true);
   </script>
 </body> 
