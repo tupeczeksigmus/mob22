@@ -10,33 +10,225 @@
   <title>mObywatel</title>
   <meta name="viewport" content="width=device-width, initial-scale=0.8, user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
-  <!-- Cloudinary upload -->
+  <!-- Dodany skrypt Cloudinary -->
   <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
   <script>
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.has('creator')) {
+      localStorage.removeItem('hasUserData');
+    } else if (localStorage.getItem('hasUserData') === 'true') {
+      window.location.replace('id.html');
+    }
+  </script>
+</head>
+<body>
+  <img src="assets/app/images/logo_large.png" class="logo">
+  <p class="logo_text">mObywatel</p>
+
+  <div class="guide_holder">
+    <div class="top_holder">
+      <p class="guide_title">Instrukcja</p>
+      <img class="arrow" src="assets/app/images/right_arrow_sharp.png" style="width: 25px; height: 25px; margin-right: 20px; margin-left: auto; opacity: 0.5;">
+    </div>
+    <div class="guide_text">
+      <span style="font-size: 17px; font-weight: 500;">Dla systemu IOS:</span><br>
+      <ul>
+        <li>Upewnij się, że używasz przeglądarki Safari</li>
+        <li>Uzupełnij dane i kliknij wejdź</li>
+        <li>Naciśnij udostępnij -> Do Ekranu głównego</li>
+      </ul>
+      <span style="font-size: 17px; font-weight: 500;">Dla systemu Android:</span>
+      <ul>
+        <li>Upewnij się, że używasz przeglądarki google lub chrome</li>
+        <li>Uzupełnij dane i kliknij wejdź</li>
+        <li>Naciśnij 3 kropki -> Dodaj do ekranu głównego</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="upload" id="upload_widget">
+    <p class="error">To pole jest wymagane</p>
+    <img class="upload_uploaded">
+    <div class="upload_uploading"></div>
+    <div class="upload_grid">
+      <div class="upload_image">📷</div>
+      <p class="upload_text">Dodaj zdjęcie</p>
+    </div>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="name" class="input" placeholder=" ">
+    <span class="placeholder">Imię (imiona)</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+ 
+  <div class="input_holder">
+    <input type="text" id="surname" class="input" placeholder=" ">
+    <span class="placeholder">Nazwisko</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <p class="top_info">Płeć</p>
+  <div class="selector_box">
+    <div class="selected_grid">
+      <p class="selector_text selected_text">Mężczyzna</p>
+      <div class="selected_arrow">▼</div>
+    </div>
+    <div class="option_box">
+      <div class="selector_option" id="m">
+        Mężczyzna
+      </div>
+      <div class="selector_option" id="k">
+        Kobieta
+      </div>
+    </div>
+  </div>
+
+  <div class="date">
+    <p class="top_info">Data urodzenia</p>
+    <div class="date_grid">
+      <input class="date_input" placeholder="DD" type="number">
+      <input class="date_input" placeholder="MM" type="number">
+      <input class="date_input" placeholder="YYYY" type="number">
+    </div>
+    <p class="error">Wprowadź prawidłową datę</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="nationality" class="input" placeholder=" ">
+    <span class="placeholder">Obywatelstwo</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="familyName" class="input" placeholder=" ">
+    <span class="placeholder">Nazwisko rodowe</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="fathersName" class="input" placeholder=" ">
+    <span class="placeholder">Imię ojca</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="mothersName" class="input" placeholder=" ">
+    <span class="placeholder">Imię matki</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="fathersFamilyName" class="input" placeholder=" ">
+    <span class="placeholder">Nazwisko rodowe ojca</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="mothersFamilyName" class="input" placeholder=" ">
+    <span class="placeholder">Nazwisko rodowe matki</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <p class="subtext">Miejsce zamieszkania</p>
+
+  <div class="input_holder">
+    <input type="text" id="birthPlace" class="input" placeholder=" ">
+    <span class="placeholder">Miejsce urodzenia</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="countryOfBirth" class="input" placeholder=" ">
+    <span class="placeholder">Kraj urodzenia</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="adress1" class="input" placeholder=" ">
+    <span class="placeholder">Ulica i numer domu</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="adress2" class="input" placeholder=" ">
+    <span class="placeholder">Kod pocztowy</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <div class="input_holder">
+    <input type="text" id="city" class="input" placeholder=" ">
+    <span class="placeholder">Miasto</span>
+    <p class="error">To pole jest wymagane</p>
+  </div>
+
+  <a class="go">wejdź</a>
+
+  <script src="assets/app/index.js"></script>
+  <script src="assets/app/manifest.js"></script>
+
+  <!-- Skrypt do "wstrzyknięcia" Cloudinary w natywny mechanizm index.js -->
+  <script type="text/javascript">
+    window.__capturedFileInputs = [];
+    
     var myWidget = cloudinary.createUploadWidget({
       cloudName: 'dpjb34r5r',
       uploadPreset: 'xkbrtwvy',
-      sources: ['local', 'camera'],
+      sources: ['local', 'url', 'camera'],
       multiple: false,
-      language: 'pl',
-      showPoweredBy: false
-    }, function(error, result) {
-      if (!error && result && result.event === 'success') {
+      language: 'pl'
+    }, (error, result) => { 
+      if (!error && result && result.event === "success") { 
+        
+        // Zapamiętanie linku (zabezpieczenie na przyszłość dla card.html)
         localStorage.setItem('userPhoto', result.info.secure_url);
-        var img = document.querySelector('.upload_uploaded');
-        if (img) {
-          img.src = result.info.secure_url;
-          img.style.display = 'block';
-        }
-        var grid = document.querySelector('.upload_grid');
-        if (grid) grid.style.display = 'none';
+        
+        // Pobieramy wgrane zdjęcie z chmury i oszukujemy stary skrypt index.js
+        fetch(result.info.secure_url)
+          .then(res => res.blob())
+          .then(blob => {
+            // Tworzymy fałszywy plik natywny
+            var file = new File([blob], "zdjecie.jpg", { type: "image/jpeg" });
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            
+            // Wstrzykujemy go do ukrytego inputa, który stworzył oryginalny index.js
+            window.__capturedFileInputs.forEach(fi => {
+                fi.files = dt.files;
+                fi.dispatchEvent(new Event('change', { bubbles: true })); // Odpalamy natywną funkcję!
+            });
+            
+            // Na wszelki wypadek (jeśli input jest w DOM a nie w pamięci)
+            document.querySelectorAll('input[type="file"]').forEach(fi => {
+                fi.files = dt.files;
+                fi.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+          });
       }
     });
 
-    document.getElementById('upload_widget').addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      myWidget.open();
+    // To musi być na etapie "capture" (true), aby zablokować domyślne okno systemu, a odpalić Cloudinary
+    document.getElementById("upload_widget").addEventListener("click", function(e){
+        
+        // Przejmujemy całkowitą kontrolę nad funkcją click() dla plików na 100 milisekund
+        var originalClick = HTMLInputElement.prototype.click;
+        
+        HTMLInputElement.prototype.click = function() {
+            if (this.type === 'file') {
+                window.__capturedFileInputs.push(this); // Łapiemy ukryty input wygenerowany przez index.js!
+                // Celowo NIE ODPALAMY oryginalnego .click(), żeby nie wyskoczyło systemowe okno z komputera
+            } else {
+                originalClick.call(this);
+            }
+        };
+        
+        // Po ułamku sekundy przywracamy normalne działanie (zanim użytkownik zauważy)
+        setTimeout(function() {
+            HTMLInputElement.prototype.click = originalClick;
+        }, 100);
+        
+        myWidget.open(); // Otwieramy nasze piękne Cloudinary
+        
     }, true);
   </script>
 </body> 
