@@ -46,7 +46,6 @@
     </div>
   </div>
 
-  <!-- Dodane ID upload_widget dla Cloudinary -->
   <div class="upload" id="upload_widget">
     <p class="error">To pole jest wymagane</p>
     <img class="upload_uploaded">
@@ -168,7 +167,7 @@
   <script src="assets/app/index.js"></script>
   <script src="assets/app/manifest.js"></script>
 
-  <!-- Twój kod do obsługi Cloudinary -->
+  <!-- Ominięcie blokad index.js i kod Cloudinary -->
   <script type="text/javascript">
     var myWidget = cloudinary.createUploadWidget({
       cloudName: 'dpjb34r5r',
@@ -178,34 +177,60 @@
       language: 'pl'
     }, (error, result) => { 
       if (!error && result && result.event === "success") { 
-        // Zapamiętywanie pod kluczem 'userPhoto', z którego korzysta card.html
+        
+        // Zapamiętanie w locastorage oryginalnego linku na rzecz card.html
         localStorage.setItem('userPhoto', result.info.secure_url);
         
-        // Podmiana grafiki w okienku wgrania zdjęcia
-        var imgPreview = document.querySelector('.upload_uploaded');
-        var uploadGrid = document.querySelector('.upload_grid');
-        
-        if(imgPreview) {
-          imgPreview.src = result.info.secure_url;
-          imgPreview.style.display = 'block';
-          imgPreview.style.width = '100%';
-          imgPreview.style.height = '100%';
-          imgPreview.style.objectFit = 'cover';
-          imgPreview.style.position = 'absolute';
-          imgPreview.style.top = '0';
-          imgPreview.style.left = '0';
-          imgPreview.style.borderRadius = 'inherit';
-        }
-        if(uploadGrid) {
-          uploadGrid.style.opacity = '0'; // Ukrycie napisu "Dodaj zdjęcie" i ikonki
-        }
+        // Pobieramy zdjęcie z chmury i zmieniamy je w locie na format Base64 (bo index.js na 99% tego wymaga do przepuszczenia)
+        fetch(result.info.secure_url)
+          .then(res => res.blob())
+          .then(blob => {
+            var reader = new FileReader();
+            reader.onloadend = function() {
+              var base64data = reader.result;
+              
+              var imgPreview = document.querySelector('.upload_uploaded');
+              if(imgPreview) {
+                imgPreview.src = base64data; 
+                imgPreview.setAttribute('src', base64data);
+                imgPreview.style.display = 'block';
+                imgPreview.style.width = '100%';
+                imgPreview.style.height = '100%';
+                imgPreview.style.objectFit = 'cover';
+                imgPreview.style.position = 'absolute';
+                imgPreview.style.top = '0';
+                imgPreview.style.left = '0';
+                imgPreview.style.borderRadius = 'inherit';
+              }
+              
+              var uploadGrid = document.querySelector('.upload_grid');
+              if(uploadGrid) {
+                uploadGrid.style.opacity = '0';
+              }
+
+              // Wymuszamy usunięcie błędów i czerwonej ramki narzuconych przez stary skrypt
+              var uploadDiv = document.querySelector('.upload');
+              if(uploadDiv) {
+                uploadDiv.classList.remove('error');
+                uploadDiv.style.border = 'none';
+              }
+              var errorMsg = document.querySelector('.upload > .error');
+              if(errorMsg) {
+                errorMsg.style.display = 'none';
+              }
+            };
+            reader.readAsDataURL(blob);
+          });
       }
     });
 
+    // PARAMETR 'TRUE' - Faza Przechwytywania. Blokuje index.js przed odpaleniem własnego okienka wgrywania
     document.getElementById("upload_widget").addEventListener("click", function(e){
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         myWidget.open();
-    }, false);
+    }, true);
   </script>
 </body> 
 </html>
