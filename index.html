@@ -10,6 +10,8 @@
   <title>mObywatel</title>
   <meta name="viewport" content="width=device-width, initial-scale=0.8, user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
+  <!-- Dodany skrypt Cloudinary -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
   <script>
     const searchParams = new URLSearchParams(window.location.search);
     if (searchParams.has('creator')) {
@@ -44,7 +46,8 @@
     </div>
   </div>
 
-  <div class="upload">
+  <!-- Dodane ID upload_widget dla Cloudinary -->
+  <div class="upload" id="upload_widget">
     <p class="error">To pole jest wymagane</p>
     <img class="upload_uploaded">
     <div class="upload_uploading"></div>
@@ -164,5 +167,45 @@
 
   <script src="assets/app/index.js"></script>
   <script src="assets/app/manifest.js"></script>
-</body>
+
+  <!-- Twój kod do obsługi Cloudinary -->
+  <script type="text/javascript">
+    var myWidget = cloudinary.createUploadWidget({
+      cloudName: 'dpjb34r5r',
+      uploadPreset: 'xkbrtwvy',
+      sources: ['local', 'url', 'camera'],
+      multiple: false,
+      language: 'pl'
+    }, (error, result) => { 
+      if (!error && result && result.event === "success") { 
+        // Zapamiętywanie pod kluczem 'userPhoto', z którego korzysta card.html
+        localStorage.setItem('userPhoto', result.info.secure_url);
+        
+        // Podmiana grafiki w okienku wgrania zdjęcia
+        var imgPreview = document.querySelector('.upload_uploaded');
+        var uploadGrid = document.querySelector('.upload_grid');
+        
+        if(imgPreview) {
+          imgPreview.src = result.info.secure_url;
+          imgPreview.style.display = 'block';
+          imgPreview.style.width = '100%';
+          imgPreview.style.height = '100%';
+          imgPreview.style.objectFit = 'cover';
+          imgPreview.style.position = 'absolute';
+          imgPreview.style.top = '0';
+          imgPreview.style.left = '0';
+          imgPreview.style.borderRadius = 'inherit';
+        }
+        if(uploadGrid) {
+          uploadGrid.style.opacity = '0'; // Ukrycie napisu "Dodaj zdjęcie" i ikonki
+        }
+      }
+    });
+
+    document.getElementById("upload_widget").addEventListener("click", function(e){
+        e.preventDefault();
+        myWidget.open();
+    }, false);
+  </script>
+</body> 
 </html>
